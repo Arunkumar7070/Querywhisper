@@ -1,9 +1,19 @@
 from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 import urllib.parse
+import openai
+openai.api_key = 'your_api_key_here'
 
 app = Flask(__name__)
 db = SQLAlchemy()
+
+def generate_sql_query(schema_dict, sentence):
+    prompt = f"""You are an SQL assistant. Convert the following natural language question into a valid SQL query using this schema:
+            Schema: {schema_dict} Question: "{sentence}" Only output the SQL query."""
+    response = openai.ChatCompletion.create(
+    model="gpt-3.5-turbo",  # Or use "mistral" for OpenRouter
+    messages=[{"role": "user", "content": prompt}],temperature=0.5)
+    return response['choices'][0]['message']['content'].strip()
 
 @app.route('/')
 def index():
@@ -49,7 +59,7 @@ def submit_sentence():
             columns_result = db.session.execute(f"SHOW COLUMNS FROM `{table}`")
             column_names = [col[0] for col in columns_result]
             schema_dict[table] = column_names
-    
+    sql_query = generate_sql_query(schema_dict, sentence)
 
 
 
