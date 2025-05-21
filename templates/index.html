@@ -21,5 +21,17 @@
 
         <button type="submit">Test Connection</button>
     </form>
+    {% if status %}
+        <hr>
+        <h3>Status: {{ message }}</h3>
+
+        {% if status == 'success' %}
+            <form method="post" action="/submit_sentence">
+                <label for="sentence">Enter an English sentence:</label><br>
+                <textarea name="sentence" placeholder="Type your sentence here..."></textarea><br><br>
+                <button type="submit">Submit Sentence</button>
+            </form>
+        {% endif %}
+    {% endif %}
 </body>
 </html>
