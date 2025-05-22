@@ -1,5 +1,4 @@
 # Natural Language SQL Query Generator
-
 This Flask web application allows users to connect to a MySQL database, input natural language questions, and generate SQL queries using the Hugging Face Inference API. The generated SQL queries are executed on the connected database, and the results are displayed in a user-friendly interface.
 
 ## Features
@@ -89,6 +88,5 @@ Replace the placeholders with your actual values.
 - Check if the query is compatible with your database schema.
 - Verify that the database user has the required permissions.
 
-
-![alt text](image.png)
-![alt text](image-1.png)
+![Screenshot 1](image-1.png)
+![Screenshot 2](image.png)
