@@ -4,7 +4,8 @@ import os
 import pymysql
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
-import requests  # For API calls
+import requests
+import re
 
 # Load environment variables from .env
 load_dotenv()
@@ -13,15 +14,13 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default-secret-key")
 
-
 HUGGINGFACE_API_TOKEN = os.getenv("HUGGINGFACE_API_TOKEN")
-HUGGINGFACE_MODEL = os.getenv("HUGGINGFACE_MODEL", "mistralai/Mistral-7B-Instruct-v0.2")
+HUGGINGFACE_MODEL = os.getenv("HUGGINGFACE_MODEL")
 
 def generate_sql_query(schema_dict, sentence):
     """Generate SQL query from natural language using Hugging Face Inference API"""
-    prompt = f"""<s>[INST] You are an SQL assistant. Convert the following natural language question into a valid SQL query using this schema:
-    Schema: {schema_dict} , Question:{sentence} Only output the SQL query, without any explanation or additional text. [/INST]</s>"""
-    
+    prompt = f"""You are an SQL assistant. Convert the following natural language question into a **single valid SQL query** using this schema:
+                Schema: {schema_dict} ,Question: {sentence} Only output one SQL query using the exact table and column names from the schema without modification or unnecessary escaping. Do not explain anything"""
     API_URL = f"https://api-inference.huggingface.co/models/{HUGGINGFACE_MODEL}"
     headers = {
         "Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}",
@@ -39,28 +38,30 @@ def generate_sql_query(schema_dict, sentence):
     }
     
     try:
-    
         response = requests.post(API_URL, headers=headers, json=payload)
-        response.raise_for_status()  
+        response.raise_for_status()
         result = response.json()
         if isinstance(result, list) and len(result) > 0:
             sql_query = result[0].get("generated_text", "").strip()
-
             sql_query = sql_query.replace("[/INST]", "").strip()
-            
-            # If the response contains explanation text, try to extract just the SQL
-            if "SELECT" in sql_query.upper() or "INSERT" in sql_query.upper() or "UPDATE" in sql_query.upper() or "DELETE" in sql_query.upper():
-                lines = sql_query.split('\n')
-                sql_lines = []
-                for line in lines:
-                    if line.strip() and not line.strip().startswith("--"):  # Keep non-empty lines that aren't comments
-                        sql_lines.append(line)
-                sql_query = '\n'.join(sql_lines)
-            
+
+            # Extract the SQL query using regex
+            match = re.search(r'\b(SELECT|INSERT|UPDATE|DELETE)\b.*?(?=;\s*$)', sql_query, re.DOTALL | re.IGNORECASE)
+            if match:
+                sql_query = match.group(0).strip()
+            else:
+                return "Error: Could not extract a valid SQL query from the model output."
+
+            # Replace incorrectly escaped column names
+            correct_column_names = [col['name'] for table in schema_dict.values() for col in table]
+            for col in correct_column_names:
+                if '_' in col:
+                    escaped_col = col.replace('_', '\\_')
+                    sql_query = sql_query.replace(escaped_col, col)
+
             return sql_query
         else:
             return "Error: Unexpected response format from the model."
-    
     except Exception as e:
         return f"Error generating SQL query: {str(e)}"
 
@@ -115,12 +116,12 @@ def submit_sentence():
     sentence = request.form['sentence']
     uri = session.get('uri')
     db_credentials = session.get('db_credentials')
-    
+
     if not uri or not db_credentials:
-        return render_template('index.html', 
-                              status='error', 
+        return render_template('index.html',
+                              status='error',
                               message='No database connection found. Please connect to a database first.')
-    
+
     try:
         # Create direct connection to database
         connection = pymysql.connect(
@@ -130,56 +131,61 @@ def submit_sentence():
             database=db_credentials['database'],
             cursorclass=pymysql.cursors.DictCursor
         )
-        
+
         # Get database schema information
         with connection.cursor() as cursor:
-            # Get all tables
             cursor.execute("SHOW TABLES")
             table_names = [row[f'Tables_in_{db_credentials["database"]}'] for row in cursor.fetchall()]
-            
             schema_dict = {}
             for table in table_names:
                 cursor.execute(f"SHOW COLUMNS FROM `{table}`")
-                column_details = []
-                for col in cursor.fetchall():
-                    column_details.append({
-                        "name": col['Field'],
-                        "type": col['Type'],
-                        "key": col['Key'] if 'Key' in col else None
-                    })
-                schema_dict[table] = column_details
-        
+                schema_dict[table] = [{
+                    "name": col['Field'],
+                    "type": col['Type'],
+                    "key": col.get('Key')
+                } for col in cursor.fetchall()]
+
         # Generate SQL query from natural language
         sql_query = generate_sql_query(schema_dict, sentence)
-        
-        # Execute the generated query
+
+        if sql_query.startswith("Error:"):
+            return render_template('index.html',
+                                   status='error',
+                                   message=sql_query,
+                                   connected_db=session.get('database'),
+                                   sentence=sentence)
+
+        # Split and execute each SQL statement safely
+        queries = [q.strip() for q in sql_query.split(';') if q.strip()]
+        all_results = []
+        last_columns = []
+
         with connection.cursor() as cursor:
-            cursor.execute(sql_query)
-            data = cursor.fetchall()
-            
-            # Get column names
-            if data:
-                columns = list(data[0].keys())
-            else:
-                columns = []
-            
-            # Convert dict rows to list format for template
-            formatted_data = []
-            for row in data:
-                formatted_data.append([row[col] for col in columns])
-        
+            for query in queries:
+                cursor.execute(query)
+                if cursor.description:  # Only SELECT-type queries return results
+                    data = cursor.fetchall()
+                    if data:
+                        last_columns = list(data[0].keys())
+                        all_results = [[row[col] for col in last_columns] for row in data]
+                    else:
+                        all_results = []
+                else:
+                    connection.commit()  # For non-SELECT queries like INSERT/UPDATE
+
         connection.close()
-        
+
         return render_template(
             'index.html',
             status='success',
             message='Query executed successfully.',
             sql_query=sql_query,
-            query_result=formatted_data,
-            columns=columns,
+            query_result=all_results,
+            columns=last_columns,
             connected_db=session.get('database'),
             sentence=sentence
         )
+
     except Exception as e:
         return render_template(
             'index.html',
