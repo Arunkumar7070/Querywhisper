@@ -90,3 +90,5 @@ Replace the placeholders with your actual values.
 - Verify that the database user has the required permissions.
 
 
+![alt text](image.png)
+![alt text](image-1.png)
