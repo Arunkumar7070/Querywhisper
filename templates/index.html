@@ -5,181 +5,589 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SQL Query Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --border-radius: 15px;
+        }
+
         body {
-            padding: 20px;
-            background-color: #f5f7fa;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .card {
-            margin-bottom: 20px;
+
+        .main-container {
+            padding: 2rem 0;
+        }
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #333 !important;
+            font-size: 1.5rem;
+        }
+
+        .card-custom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header-custom {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            padding: 1.5rem;
+            font-weight: 600;
+            border: none;
+        }
+
+        .card-body-custom {
+            padding: 2rem;
+        }
+
+        .form-control-custom {
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
         }
-        .card-header {
-            background-color: #f8f9fa;
-            font-weight: bold;
+
+        .form-control-custom:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: #fff;
         }
-        .form-group {
-            margin-bottom: 15px;
+
+        .btn-custom {
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: none;
         }
-        .result-table {
-            width: 100%;
+
+        .btn-primary-custom {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .btn-success-custom {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .btn-success-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-danger-custom {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .btn-danger-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(250, 112, 154, 0.3);
+        }
+
+        .alert-custom {
+            border-radius: var(--border-radius);
+            border: none;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-success-custom {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .alert-danger-custom {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            color: white;
+            margin-right: 1rem;
+        }
+
+        .table-custom {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .table-custom thead {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
             overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid #4a5568;
         }
-        .sql-query {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: monospace;
-            white-space: pre-wrap;
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
         }
-        .alert {
-            margin-bottom: 20px;
+
+        .floating-shapes div {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
         }
-        .loading {
-            display: none;
+
+        .floating-shapes div:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-shapes div:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            right: 10%;
+            animation-delay: 3s;
+        }
+
+        .floating-shapes div:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 6s;
+        }
+
+        .floating-shapes div:nth-child(4) {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            right: 30%;
+            animation-delay: 2s;
+        }
+
+        .floating-shapes div:nth-child(5) {
+            width: 120px;
+            height: 120px;
+            bottom: 10%;
+            right: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-15px) rotate(90deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+            75% { transform: translateY(-20px) rotate(270deg); }
+        }
+
+        .welcome-hero {
             text-align: center;
-            margin: 20px 0;
+            color: white;
+            margin-bottom: 3rem;
         }
-        .db-status {
-            margin-bottom: 20px;
+
+        .welcome-hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-card i {
+            font-size: 3rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .connection-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .status-connected {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .status-disconnected {
+            background: #6c757d;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .welcome-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .card-body-custom {
+                padding: 1.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center mb-4">Natural Language SQL Query Generator</h1>
-        
-        <!-- Connection Status -->
-        {% if connected_db %}
-        <div class="alert alert-success db-status">
-            <div class="d-flex justify-content-between align-items-center">
-                <strong>Connected to database: {{ connected_db }}</strong>
-                <form action="/disconnect" method="post">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Disconnect</button>
-                </form>
+    <div class="floating-shapes">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
+
+    <div class="container-fluid main-container">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-database me-2"></i>SQL Query Generator
+                </a>
+                
+                <div class="d-flex align-items-center">
+                    {% if user_data %}
+                        <div class="user-info">
+                            <i class="fas fa-user me-2"></i>{{ user_data.name }}
+                            <small class="d-block">{{ user_data.email }}</small>
+                        </div>
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="btn btn-primary-custom btn-custom me-2">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                        <a href="{{ url_for('register') }}" class="btn btn-success-custom btn-custom">
+                            <i class="fas fa-user-plus me-1"></i>Register
+                        </a>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-        {% endif %}
-        
-        <!-- Messages -->
-        {% if status %}
-            {% if status == 'success' %}
-                <div class="alert alert-success">{{ message }}</div>
+        </nav>
+
+        <div class="container">
+            {% if not user_data %}
+                <!-- Welcome Section for Non-logged Users -->
+                <div class="welcome-hero">
+                    <h1><i class="fas fa-magic me-3"></i>Transform Natural Language to SQL</h1>
+                    <p>Convert your questions into powerful SQL queries with AI assistance</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-language"></i>
+                        <h4>Natural Language Processing</h4>
+                        <p>Simply describe what data you need in plain English, and our AI will generate the SQL query for you.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-database"></i>
+                        <h4>Database Integration</h4>
+                        <p>Connect to your MySQL databases securely and execute queries directly from the interface.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-chart-bar"></i>
+                        <h4>Instant Results</h4>
+                        <p>View query results in a clean, organized table format with full data visualization.</p>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary-custom btn-custom btn-lg me-3">
+                        <i class="fas fa-rocket me-2"></i>Get Started Free
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-success-custom btn-custom btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
             {% else %}
-                <div class="alert alert-danger">{{ message }}</div>
+                <!-- Main Application for Logged Users -->
+                
+                <!-- Status Messages -->
+                {% if status == 'success' %}
+                    <div class="alert alert-success-custom alert-custom">
+                        <i class="fas fa-check-circle me-2"></i>{{ message }}
+                    </div>
+                {% elif status == 'error' %}
+                    <div class="alert alert-danger-custom alert-custom">
+                        <i class="fas fa-exclamation-triangle me-2"></i>{{ message }}
+                    </div>
+                {% endif %}
+
+                <!-- Connection Status -->
+                <div class="text-center mb-4">
+                    {% if connected_db %}
+                        <span class="connection-status status-connected">
+                            <i class="fas fa-check-circle me-2"></i>Connected to: {{ connected_db }}
+                        </span>
+                    {% else %}
+                        <span class="connection-status status-disconnected">
+                            <i class="fas fa-times-circle me-2"></i>No Database Connected
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Database Connection Card -->
+                {% if not connected_db %}
+                <div class="card card-custom">
+                    <div class="card-header card-header-custom">
+                        <h5 class="mb-0"><i class="fas fa-plug me-2"></i>Database Connection</h5>
+                    </div>
+                    <div class="card-body card-body-custom">
+                        <form action="{{ url_for('getinput') }}" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="server" class="form-label"><i class="fas fa-server me-2"></i>Server</label>
+                                    <input type="text" class="form-control form-control-custom" id="server" name="server" placeholder="localhost" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="database" class="form-label"><i class="fas fa-database me-2"></i>Database</label>
+                                    <input type="text" class="form-control form-control-custom" id="database" name="database" placeholder="database_name" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label"><i class="fas fa-user me-2"></i>Username</label>
+                                    <input type="text" class="form-control form-control-custom" id="username" name="username" placeholder="username" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label"><i class="fas fa-lock me-2"></i>Password</label>
+                                    <input type="password" class="form-control form-control-custom" id="password" name="password" placeholder="password" required>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary-custom btn-custom">
+                                    <i class="fas fa-link me-2"></i>Connect to Database
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Query Input Card -->
+                {% if connected_db %}
+                <div class="card card-custom">
+                    <div class="card-header card-header-custom">
+                        <h5 class="mb-0"><i class="fas fa-comment-dots me-2"></i>Natural Language Query</h5>
+                    </div>
+                    <div class="card-body card-body-custom">
+                        <form action="{{ url_for('submit_sentence') }}" method="post">
+                            <div class="mb-3">
+                                <label for="sentence" class="form-label">Describe what data you want to retrieve:</label>
+                                <textarea class="form-control form-control-custom" id="sentence" name="sentence" rows="4" 
+                                          placeholder="Example: Show me all customers who placed orders in the last 30 days" required>{{ sentence if sentence else '' }}</textarea>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-success-custom btn-custom">
+                                    <i class="fas fa-search me-2"></i>Generate & Execute Query
+                                </button>
+                                <form action="{{ url_for('disconnect') }}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-danger-custom btn-custom">
+                                        <i class="fas fa-unlink me-2"></i>Disconnect
+                                    </button>
+                                </form>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Generated SQL Query Display -->
+                {% if sql_query %}
+                <div class="card card-custom">
+                    <div class="card-header card-header-custom">
+                        <h5 class="mb-0"><i class="fas fa-code me-2"></i>Generated SQL Query</h5>
+                    </div>
+                    <div class="card-body card-body-custom">
+                        <div class="code-block">{{ sql_query }}</div>
+                        <button class="btn btn-primary-custom btn-custom btn-sm" onclick="copyToClipboard('{{ sql_query|replace("'", "\\'") }}')">
+                            <i class="fas fa-copy me-2"></i>Copy Query
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Query Results Display -->
+                {% if query_result is defined and columns %}
+                <div class="card card-custom">
+                    <div class="card-header card-header-custom">
+                        <h5 class="mb-0"><i class="fas fa-table me-2"></i>Query Results ({{ query_result|length }} rows)</h5>
+                    </div>
+                    <div class="card-body card-body-custom">
+                        {% if query_result %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-custom">
+                                <thead>
+                                    <tr>
+                                        {% for column in columns %}
+                                        <th>{{ column }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in query_result %}
+                                    <tr>
+                                        {% for cell in row %}
+                                        <td>{{ cell if cell is not none else 'NULL' }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center text-muted">
+                            <i class="fas fa-info-circle me-2"></i>No results returned from the query.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
             {% endif %}
-        {% endif %}
-        
-        <!-- Database Connection Form -->
-        {% if not connected_db %}
-        <div class="card">
-            <div class="card-header">Connect to MySQL Database</div>
-            <div class="card-body">
-                <form action="/getinput" method="post">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="server">Server:</label>
-                                <input type="text" class="form-control" id="server" name="server" placeholder="localhost" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="database">Database:</label>
-                                <input type="text" class="form-control" id="database" name="database" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="username">Username:</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="password">Password:</label>
-                                <input type="password" class="form-control" id="password" name="password">
-                            </div>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Connect</button>
-                </form>
-            </div>
         </div>
-        {% endif %}
-        
-        <!-- Natural Language Query Form -->
-        {% if connected_db %}
-        <div class="card">
-            <div class="card-header">Ask a Question</div>
-            <div class="card-body">
-                <form action="/submit_sentence" method="post" id="queryForm">
-                    <div class="form-group">
-                        <label for="sentence">What would you like to know about your data?</label>
-                        <input type="text" class="form-control" id="sentence" name="sentence" 
-                               placeholder="e.g., Show me all customers from New York" 
-                               value="{{ sentence }}" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Generate SQL & Execute</button>
-                </form>
-                <div class="loading" id="loadingIndicator">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Generating SQL query and executing...</p>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        
-        <!-- SQL Query Display -->
-        {% if sql_query %}
-        <div class="card">
-            <div class="card-header">Generated SQL Query</div>
-            <div class="card-body">
-                <div class="sql-query">{{ sql_query }}</div>
-            </div>
-        </div>
-        {% endif %}
-        
-        <!-- Query Results -->
-        {% if query_result %}
-        <div class="card">
-            <div class="card-header">Query Results</div>
-            <div class="card-body">
-                <div class="result-table">
-                    <table class="table table-striped table-bordered">
-                        <thead class="table-dark">
-                            <tr>
-                                {% for column in columns %}
-                                <th>{{ column }}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in query_result %}
-                            <tr>
-                                {% for cell in row %}
-                                <td>{{ cell }}</td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Show loading indicator when form is submitted
-        document.getElementById('queryForm')?.addEventListener('submit', function() {
-            document.getElementById('loadingIndicator').style.display = 'block';
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show success message
+                const btn = event.target.closest('button');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+                btn.classList.remove('btn-primary-custom');
+                btn.classList.add('btn-success-custom');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success-custom');
+                    btn.classList.add('btn-primary-custom');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        // Auto-resize textarea
+        document.getElementById('sentence')?.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Form validation
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    
+                    // Re-enable after 10 seconds to prevent permanent disable
+                    setTimeout(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }, 10000);
+                }
+            });
         });
     </script>
 </body>
