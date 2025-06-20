@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-
 </head>
 <body>
     <div class="floating-shapes">
@@ -53,6 +52,15 @@
                 <div class="welcome-hero">
                     <h1><i class="fas fa-magic me-3"></i>Transform Natural Language to SQL</h1>
                     <p>Convert your questions into powerful SQL queries with AI assistance</p>
+                    <div class="supported-databases">
+                        <h6>Supported Databases:</h6>
+                        <div class="db-icons">
+                            <span class="db-icon"><i class="fas fa-database"></i> MySQL</span>
+                            <span class="db-icon"><i class="fas fa-elephant"></i> PostgreSQL</span>
+                            <span class="db-icon"><i class="fas fa-file-alt"></i> SQLite</span>
+                            <span class="db-icon"><i class="fas fa-server"></i> SQL Server</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="feature-grid">
@@ -63,8 +71,8 @@
                     </div>
                     <div class="feature-card">
                         <i class="fas fa-database"></i>
-                        <h4>Database Integration</h4>
-                        <p>Connect to your MySQL databases securely and execute queries directly from the interface.</p>
+                        <h4>Multi-Database Support</h4>
+                        <p>Connect to MySQL, PostgreSQL, SQLite, and SQL Server databases with seamless integration.</p>
                     </div>
                     <div class="feature-card">
                         <i class="fas fa-chart-bar"></i>
@@ -99,7 +107,7 @@
                 <div class="text-center mb-4">
                     {% if connected_db %}
                         <span class="connection-status status-connected">
-                            <i class="fas fa-check-circle me-2"></i>Connected to: {{ connected_db }}
+                            <i class="fas fa-check-circle me-2"></i>Connected to: {{ connected_db_type }} - {{ connected_db }}
                         </span>
                     {% else %}
                         <span class="connection-status status-disconnected">
@@ -115,29 +123,79 @@
                         <h5 class="mb-0"><i class="fas fa-plug me-2"></i>Database Connection</h5>
                     </div>
                     <div class="card-body card-body-custom">
-                        <form action="{{ url_for('getinput') }}" method="post">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="server" class="form-label"><i class="fas fa-server me-2"></i>Server</label>
-                                    <input type="text" class="form-control form-control-custom" id="server" name="server" placeholder="localhost" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="database" class="form-label"><i class="fas fa-database me-2"></i>Database</label>
-                                    <input type="text" class="form-control form-control-custom" id="database" name="database" placeholder="database_name" required>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="username" class="form-label"><i class="fas fa-user me-2"></i>Username</label>
-                                    <input type="text" class="form-control form-control-custom" id="username" name="username" placeholder="username" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="password" class="form-label"><i class="fas fa-lock me-2"></i>Password</label>
-                                    <input type="password" class="form-control form-control-custom" id="password" name="password" placeholder="password" required>
+                        <form action="{{ url_for('getinput') }}" method="post" id="dbConnectionForm">
+                            <!-- Database Type Selection -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <label for="db_type" class="form-label"><i class="fas fa-database me-2"></i>Database Type</label>
+                                    <select class="form-select form-control-custom" id="db_type" name="db_type" required onchange="updateConnectionForm()">
+                                        <option value="">Select Database Type</option>
+                                        {% for db_key, db_info in db_configs.items() %}
+                                        <option value="{{ db_key }}">
+                                            {{ db_info.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                             </div>
+
+                            <!-- Dynamic Connection Fields -->
+                            <div id="connectionFields">
+                                <!-- MySQL/PostgreSQL/SQL Server Fields -->
+                                <div class="db-fields" data-db="mysql postgresql sqlserver">
+                                    <div class="row">
+                                        <div class="col-md-8 mb-3">
+                                            <label for="server" class="form-label"><i class="fas fa-server me-2"></i>Server/Host</label>
+                                            <input type="text" class="form-control form-control-custom" id="server" name="server" placeholder="localhost">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="port" class="form-label"><i class="fas fa-plug me-2"></i>Port</label>
+                                            <input type="number" class="form-control form-control-custom" id="port" name="port" placeholder="">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label for="database" class="form-label"><i class="fas fa-database me-2"></i>Database Name</label>
+                                            <input type="text" class="form-control form-control-custom" id="database" name="database" placeholder="database_name">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="username" class="form-label"><i class="fas fa-user me-2"></i>Username</label>
+                                            <input type="text" class="form-control form-control-custom" id="username" name="username" placeholder="username">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="password" class="form-label"><i class="fas fa-lock me-2"></i>Password</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control form-control-custom" id="password" name="password" placeholder="password">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                                    <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- SQLite Fields -->
+                                <div class="db-fields" data-db="sqlite" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-12 mb-3">
+                                            <label for="database_path" class="form-label"><i class="fas fa-file-alt me-2"></i>Database File Path</label>
+                                            <input type="text" class="form-control form-control-custom" id="database_path" name="database_path" placeholder="/path/to/your/database.db">
+                                            <div class="form-text">Enter the full path to your SQLite database file</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connection Info Display -->
+                            <div id="connectionInfo" class="alert alert-info-custom" style="display: none;">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span id="connectionInfoText"></span>
+                            </div>
+
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary-custom btn-custom">
+                                <button type="submit" class="btn btn-primary-custom btn-custom" id="connectBtn" disabled>
                                     <i class="fas fa-link me-2"></i>Connect to Database
                                 </button>
                             </div>
@@ -158,6 +216,12 @@
                                 <label for="sentence" class="form-label">Describe what data you want to retrieve:</label>
                                 <textarea class="form-control form-control-custom" id="sentence" name="sentence" rows="4" 
                                           placeholder="Example: Show me all customers who placed orders in the last 30 days" required>{{ sentence if sentence else '' }}</textarea>
+                                <div class="form-text">
+                                    <strong>Examples:</strong><br>
+                                    • "Get all users created in the last month"<br>
+                                    • "Show products with price greater than 100"<br>
+                                    • "Find customers who have never placed an order"
+                                </div>
                             </div>
                             <div class="d-flex justify-content-between">
                                 <button type="submit" class="btn btn-success-custom btn-custom">
@@ -231,6 +295,84 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Database configurations from Flask
+        const dbConfigs = {{ db_configs | tojson }};
+
+        function updateConnectionForm() {
+            const dbType = document.getElementById('db_type').value;
+            const connectBtn = document.getElementById('connectBtn');
+            const connectionInfo = document.getElementById('connectionInfo');
+            const connectionInfoText = document.getElementById('connectionInfoText');
+            
+            // Hide all field groups
+            document.querySelectorAll('.db-fields').forEach(field => {
+                field.style.display = 'none';
+            });
+
+            if (dbType) {
+                // Show relevant fields
+                const relevantFields = document.querySelector(`.db-fields[data-db*="${dbType}"]`);
+                if (relevantFields) {
+                    relevantFields.style.display = 'block';
+                }
+
+                // Update port placeholder and connection info
+                const config = dbConfigs[dbType];
+                const portField = document.getElementById('port');
+                
+                if (config.default_port && portField) {
+                    portField.placeholder = config.default_port;
+                    portField.value = config.default_port;
+                }
+
+                // Show connection info
+                connectionInfo.style.display = 'block';
+                connectionInfoText.textContent = `Selected: ${config.name}${config.default_port ? ` (Default port: ${config.default_port})` : ''}`;
+
+                // Enable connect button
+                connectBtn.disabled = false;
+
+                // Set required fields
+                setRequiredFields(dbType);
+            } else {
+                connectBtn.disabled = true;
+                connectionInfo.style.display = 'none';
+            }
+        }
+
+        function setRequiredFields(dbType) {
+            // Reset all required attributes
+            document.querySelectorAll('.db-fields input').forEach(input => {
+                input.required = false;
+            });
+
+            // Set required based on database type
+            const config = dbConfigs[dbType];
+            if (config && config.fields) {
+                config.fields.forEach(fieldName => {
+                    const field = document.getElementById(fieldName);
+                    if (field) {
+                        field.required = true;
+                    }
+                });
+            }
+        }
+
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(function() {
                 // Show success message
@@ -247,6 +389,21 @@
                 }, 2000);
             }).catch(function(err) {
                 console.error('Could not copy text: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const btn = event.target.closest('button');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+                } catch (err) {
+                    console.error('Fallback: Could not copy text: ', err);
+                }
+                document.body.removeChild(textArea);
             });
         }
 
@@ -256,22 +413,27 @@
             this.style.height = this.scrollHeight + 'px';
         });
 
-        // Form validation
+        // Form validation and loading states
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 const submitBtn = this.querySelector('button[type="submit"]');
-                if (submitBtn) {
+                if (submitBtn && !submitBtn.disabled) {
                     submitBtn.disabled = true;
                     const originalText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
                     
-                    // Re-enable after 10 seconds to prevent permanent disable
+                    // Re-enable after 15 seconds to prevent permanent disable
                     setTimeout(() => {
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalText;
-                    }, 10000);
+                    }, 15000);
                 }
             });
+        });
+
+        // Initialize form on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateConnectionForm();
         });
     </script>
 </body>
