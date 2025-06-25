@@ -639,4 +639,4 @@ Output a single SQL query or an empty string if the query cannot be generated.""
         return f"Error generating SQL query: {str(e)}"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
