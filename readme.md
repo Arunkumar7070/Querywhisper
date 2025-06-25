@@ -1,92 +1,273 @@
-# Natural Language SQL Query Generator
-This Flask web application allows users to connect to a MySQL database, input natural language questions, and generate SQL queries using the Hugging Face Inference API. The generated SQL queries are executed on the connected database, and the results are displayed in a user-friendly interface.
+# 🗃️ Natural Language to SQL Database Interface
 
-## Features
+A powerful Flask web application that converts natural language queries into SQL statements and executes them across multiple database systems using AI-powered query generation.
 
-- Connect to a MySQL database using provided credentials.
-- Input natural language questions about the data.
-- Generate SQL queries using the Hugging Face model.
-- Execute the generated SQL queries on the connected database.
-- Display the query results in a tabular format.
-- View the generated SQL query for verification.
+## ✨ Features
 
-## Prerequisites
+### 🔐 Authentication & Authorization
+- **User Registration & Login**: Secure user authentication with bcrypt password hashing
+- **Role-Based Access Control (RBAC)**: Two user roles with different permissions
+  - **Admin**: Full database access (SELECT, INSERT, UPDATE, DELETE)
+  - **User**: Read-only access (SELECT queries only)
+- **Session Management**: Secure session handling with automatic logout
 
-- Python 3.x
-- MySQL server
-- Hugging Face account and API token
-- Required Python packages:
-    - Flask
-    - pymysql
-    - SQLAlchemy
-    - requests
-    - python-dotenv
+### 🗄️ Multi-Database Support
+- **MySQL**: Full support with optimized connection handling
+- **PostgreSQL**: Complete PostgreSQL integration
+- **SQLite**: Lightweight database support for local development
+- **SQL Server**: Enterprise-grade SQL Server connectivity
 
-## Installation
+### 🤖 AI-Powered Query Generation
+- **Natural Language Processing**: Convert plain English to SQL using Groq's LLaMA model
+- **Schema-Aware**: Automatically analyzes database structure for accurate query generation
+- **Syntax Optimization**: Database-specific query optimization and formatting
+- **Error Handling**: Intelligent error detection and user-friendly error messages
 
-1. Clone the repository:
-     ```bash
-     git clone <repository_url>
-     cd <repository_directory>
-     ```
+### 🛡️ Security Features
+- **SQL Injection Protection**: SQLAlchemy parameterized queries
+- **Input Validation**: Comprehensive input sanitization
+- **Access Control**: Role-based query restrictions
+- **Session Security**: Secure session management with encrypted cookies
 
-2. Install the required Python packages:
-     ```bash
-     pip install -r requirements.txt
-     ```
+### 🎨 User Interface
+- **Responsive Design**: Mobile-friendly interface
+- **Real-time Feedback**: Instant connection status and query results
+- **Interactive Forms**: Dynamic database connection forms
+- **Result Visualization**: Tabular display of query results
 
-3. Set up a virtual environment (optional but recommended):
-     ```bash
-     python -m venv venv
-     source venv/bin/activate  # On Windows: venv\Scripts\activate
-     ```
+## 🚀 Quick Start
 
-## Configuration
+### Prerequisites
+- Python 3.8+
+- MongoDB (for user management)
+- Database system(s) you want to connect to
+- Groq API key
 
-Create a `.env` file in the project root directory with the following variables:
-```env
-SECRET_KEY=your_flask_secret_key
-HUGGINGFACE_API_TOKEN=your_huggingface_api_token
-HUGGINGFACE_MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd database-interface-app
+   ```
+
+2. **Create virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   # Application Settings
+   SECRET_KEY=your-secret-key-here
+   
+   # MongoDB Configuration
+   MONGODB_URI=mongodb://localhost:27017/
+   MONGODB_DATABASE=database_app
+   
+   # Groq API Configuration
+   GROQ_API_KEY=your-groq-api-key-here
+   ```
+
+5. **Run the application**
+   ```bash
+   python app.py
+   ```
+
+6. **Access the application**
+   Open your browser and navigate to `http://localhost:5000`
+
+## 📋 Dependencies
+
+### Core Framework
 ```
-Replace the placeholders with your actual values.
+Flask==2.3.3
+Flask-Bcrypt==1.0.1
+```
 
-## Usage
+### Database Drivers
+```
+pymongo==4.5.0
+pymysql==1.1.0
+psycopg2-binary==2.9.7
+pyodbc==4.0.39
+SQLAlchemy==2.0.21
+```
 
-1. Start the Flask server:
-     ```bash
-     python app.py
-     ```
+### AI & NLP
+```
+langchain-groq==0.1.6
+langchain==0.2.6
+```
 
-2. Access the web interface by navigating to [http://localhost:5000](http://localhost:5000) in your web browser.
+### Utilities
+```
+python-dotenv==1.0.0
+```
 
-3. Connect to your MySQL database:
-     - Enter the server, database, username, and password in the connection form.
-     - Click **Connect** to establish the connection.
+## 🗂️ Project Structure
 
-4. Input a natural language query:
-     - Once connected, enter a question about your data in the provided input field.
-     - Click **Generate SQL & Execute** to generate and execute the SQL query.
+```
+database-interface-app/
+├── app.py                 # Main application file
+├── requirements.txt       # Python dependencies
+├── .env                  # Environment variables (create this)
+├── templates/            # HTML templates
+│   ├── index.html       # Main dashboard
+│   ├── login.html       # Login page
+│   └── register.html    # Registration page
+├── static/              # Static assets
+│   ├── css/            # Stylesheets
+└── README.md           # This file
+```
 
-5. View the results:
-     - The generated SQL query will be displayed.
-     - If the query is a `SELECT` statement, the results will be shown in a table.
+## 🔧 Configuration
 
-## Troubleshooting
+### Database Connection Settings
 
-### Database connection errors:
-- Ensure the MySQL server is running and accessible.
-- Verify the connection credentials are correct.
-- Check for any firewall or network issues.
+The application supports multiple database types with specific configuration requirements:
 
-### Hugging Face API issues:
-- Confirm your API token is valid and has the necessary permissions.
-- Ensure the specified model is correct and available.
+#### MySQL
+```python
+DB_CONFIG = {
+    'server': 'localhost',
+    'port': 3306,
+    'database': 'your_database',
+    'username': 'your_username',
+    'password': 'your_password'
+}
+```
 
-### SQL query execution errors:
-- Review the generated SQL query for syntax errors.
-- Check if the query is compatible with your database schema.
-- Verify that the database user has the required permissions.
+#### PostgreSQL
+```python
+DB_CONFIG = {
+    'server': 'localhost',
+    'port': 5432,
+    'database': 'your_database',
+    'username': 'your_username',
+    'password': 'your_password'
+}
+```
 
-![Screenshot 1](image-1.png)
-![Screenshot 2](image.png)
+#### SQLite
+```python
+DB_CONFIG = {
+    'database_path': '/path/to/your/database.db'
+}
+```
+
+#### SQL Server
+```python
+DB_CONFIG = {
+    'server': 'localhost',
+    'port': 1433,
+    'database': 'your_database',
+    'username': 'your_username',
+    'password': 'your_password'
+}
+```
+
+### Groq API Setup
+
+1. Sign up at [Groq Console](https://console.groq.com/)
+2. Create an API key
+3. Add the key to your `.env` file
+4. The application uses the `llama3-70b-8192` model for query generation
+
+## 🎯 Usage Guide
+
+### User Registration
+1. Navigate to `/register`
+2. Fill in your details
+3. Select your role (Admin or User)
+4. Click "Register"
+
+### Database Connection
+1. Log in to your account
+2. Select your database type
+3. Enter connection details
+4. Click "Connect"
+
+### Natural Language Queries
+Once connected, you can enter natural language queries such as:
+
+**Example Queries:**
+- "Show me all users"
+- "Find customers from New York"
+- "Count the number of orders this month"
+- "Update user email where id is 5" (Admin only)
+- "Delete inactive users" (Admin only)
+
+### Query Results
+- Results are displayed in a formatted table
+- Generated SQL queries are shown for transparency
+- Error messages provide helpful debugging information
+
+## 🔐 Security Considerations
+
+### Authentication
+- Passwords are hashed using bcrypt
+- Session tokens are securely generated
+- Automatic session expiration
+
+### Database Security
+- Parameterized queries prevent SQL injection
+- Connection strings are encrypted
+- Database credentials are not logged
+
+### Access Control
+- Role-based permissions enforce data access policies
+- User role restrictions prevent unauthorized modifications
+- Admin oversight for sensitive operations
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Connection Errors**
+- Verify database credentials
+- Check network connectivity
+- Ensure database server is running
+
+**Query Generation Errors**
+- Verify Groq API key is valid
+- Check natural language query clarity
+- Ensure database schema is accessible
+
+**Permission Errors**
+- Verify user role permissions
+- Check database user privileges
+- Confirm table access rights
+
+
+
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+
+
+---
+
+## 🚀 Future Enhancements
+
+1. Verify the users mail sending otp
+2. Forgot password
+3. Report Generation 
+4. Query Optimization
+
+---
+##Sample output
+'![alt text](<Screenshot 2025-06-25 at 2.21.15 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.20.49 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.20.42 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.20.20 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.20.06 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.19.55 PM-1.png>)
