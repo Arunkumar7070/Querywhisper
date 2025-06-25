@@ -270,4 +270,4 @@ Once connected, you can enter natural language queries such as:
 
 ---
 ##Sample output
-'![alt text](<Screenshot 2025-06-25 at 2.21.15 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.20.49 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.20.42 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.20.20 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.20.06 PM-1.png>) ![alt text](<Screenshot 2025-06-25 at 2.19.55 PM-1.png>)
+![alt text](sample_output_1.png) ![alt text](sample_output_2.png) ![alt text](sample_output_3.png) ![alt text](sample_output_4.png) ![alt text](sample_output_5.png) ![alt text](sample_output_6.png)
