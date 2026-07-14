@@ -68,6 +68,15 @@
                     </div>
                 </div>
 
+                <div class="form-floating">
+                    <select class="form-select" id="role" name="role" required>
+                        <option value="" selected disabled>Choose account type</option>
+                        <option value="user">User &mdash; read-only queries (SELECT only)</option>
+                        <option value="admin">Admin &mdash; full access (SELECT, INSERT, UPDATE, DELETE)</option>
+                    </select>
+                    <label for="role"><i class="fas fa-user-shield me-2"></i>Account Type</label>
+                </div>
+
                 <button type="submit" class="btn btn-primary btn-register">
                     <i class="fas fa-user-plus me-2"></i>Create Account
                 </button>

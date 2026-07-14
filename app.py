@@ -38,7 +38,7 @@ users_collection = db["users"]
 
 # Initialize Grok (ChatGroq) for SQL query generation
 API_KEY = os.getenv("GROQ_API_KEY")
-llm = ChatGroq(api_key=API_KEY, model="llama3-70b-8192")
+llm = ChatGroq(api_key=API_KEY, model="llama-3.3-70b-versatile")
 
 # Database configuration
 DB_CONFIGS = {
@@ -516,12 +516,9 @@ def submit_sentence():
         for query in queries:
             result = connection.execute(text(query))
             if result.returns_rows:
+                last_columns = list(result.keys())
                 rows = result.fetchall()
-                if rows:
-                    last_columns = list(rows[0].keys())
-                    all_results = [[row[col] for col in last_columns] for row in rows]
-                else:
-                    all_results = []
+                all_results = [list(row) for row in rows] if rows else []
             else:
                 connection.commit()
 
